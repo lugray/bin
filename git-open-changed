@@ -1,0 +1,12 @@
+#!/bin/bash
+
+BASE_BRANCH="master"
+
+CHANGES_BRANCH="`git symbolic-ref --short HEAD`"
+if [ "$CHANGES_BRANCH" = "$BASE_BRANCH" ]; then
+	ANCESTOR="$BASE_BRANCH"
+else
+	ANCESTOR="`git merge-base "$BASE_BRANCH" "$CHANGES_BRANCH"`"
+fi
+subl --command close_all
+subl `git diff "$ANCESTOR" --name-only`
