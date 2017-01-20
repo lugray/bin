@@ -10,18 +10,10 @@ else
 fi
 
 subl --command close_all
-git diff -U0 "$ANCESTOR" | awk -F '[-, ]' '
-  /^\+\+\+ b/ { file_name = substr($0, 7) }
-  /^@@ -/ && file_name != "" { print file_name ":" $3; file_name = "" }
-' | while read FILE_SPEC; do
-  subl $FILE_SPEC
-done
-
-# # This should work and would be slightly simpler, but while the cursor is at the right place in each file, only the
-# # last file gets scrolled to the appropriate place.
-# subl $(
-#   git diff -U0 "$ANCESTOR" | awk -F '[-, ]' '
-#     /^\+\+\+ b/ { file_name = substr($0, 7) }
-#     /^@@ -/ && file_name != "" { print file_name ":" $3; file_name = "" }
-#   '
-# )
+subl `git diff "$ANCESTOR" --name-only` # This first pass is needed so that the second pass scrolls properly
+subl $(
+  git diff -U0 "$ANCESTOR" | awk -F '[-, ]' '
+    /^\+\+\+ b/ { file_name = substr($0, 7) }
+    /^@@ -/ && file_name != "" { print file_name ":" $3; file_name = "" }
+  '
+)
