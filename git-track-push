@@ -10,3 +10,4 @@ fi
 BRANCH="`git symbolic-ref --short HEAD`"
 
 git push -u "$REMOTE" "$BRANCH"
+git remote set-branches --add origin "$BRANCH"
