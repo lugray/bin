@@ -10,10 +10,11 @@ else
 fi
 
 subl --command close_all
-subl `git diff "$ANCESTOR" --name-only` # This first pass is needed so that the second pass scrolls properly
+subl `git diff "$ANCESTOR" --name-only; git status --porcelain | grep '^??' | sed 's/^?? //'` # This first pass is needed so that the second pass scrolls properly
 subl $(
   git diff -U0 "$ANCESTOR" | awk -F '[-, ]' '
     /^\+\+\+ b/ { file_name = substr($0, 7) }
     /^@@ -/ && file_name != "" { print file_name ":" $3; file_name = "" }
   '
+  git status --porcelain | grep '^??' | sed 's/^?? //'
 )
