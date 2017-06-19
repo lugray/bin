@@ -1,1 +1,1 @@
-This is my ~/bin.
+This is my ~/bin..
