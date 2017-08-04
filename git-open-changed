@@ -1,20 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env ruby
 
-BASE_BRANCH="master"
+require 'shellwords'
 
-CHANGES_BRANCH="`git symbolic-ref --short HEAD`"
-if [ "$CHANGES_BRANCH" = "$BASE_BRANCH" ]; then
-	ANCESTOR="$BASE_BRANCH"
-else
-	ANCESTOR="`git merge-base "$BASE_BRANCH" "$CHANGES_BRANCH"`"
-fi
+ancestor = `git merge-base master HEAD`.strip
+files = `git ls-files --others --exclude-standard`.split("\n").map do |file|
+  Shellwords.escape(file)
+end
 
-subl --command close_all
-subl `git diff "$ANCESTOR" --name-only; git status --porcelain | grep '^??' | sed 's/^?? //'` # This first pass is needed so that the second pass scrolls properly
-subl $(
-  git diff -U0 "$ANCESTOR" | awk -F '[-, ]' '
-    /^\+\+\+ b/ { file_name = substr($0, 7) }
-    /^@@ -/ && file_name != "" { print file_name ":" $3; file_name = "" }
-  '
-  git status --porcelain | grep '^??' | sed 's/^?? //'
-)
+`git diff -U0 #{ancestor}`.split("\n").each_cons(2) do |line1, line2|
+  matches = %r{^\+\+\+ b/(.*)}.match(line1)
+  next unless matches
+
+  line_number = /^@@ -(\d+)/.match(line2)[1]
+  file = Shellwords.escape(matches[1])
+  files << "#{file}:#{line_number}"
+end
+
+`subl --command close_all`
+# Twice so that the files scroll properly
+`subl #{files.join(' ')}`
+`subl #{files.join(' ')}`
