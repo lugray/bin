@@ -5,5 +5,5 @@ abort USAGE unless ARGV.size == 1
 abort USAGE unless ARGV.first[":"]
 user, branch = ARGV.first.split(":")
 
-repo = `basename $(git config --get remote.origin.url)`.split(".").first
+repo = `basename $(git config --get remote.origin.url)`.strip.split(".").first
 `git fetch git@github.com:#{user}/#{repo} #{branch}:#{user}/#{branch}`
